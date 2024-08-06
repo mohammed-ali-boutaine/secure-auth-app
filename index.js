@@ -8,12 +8,13 @@ import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import User from "./models/User.js";
 
-
+// Load environment variables
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Session setup
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -27,14 +28,14 @@ app.use(
   })
 );
 
+// Middleware setup
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.set("view engine", "ejs");
 
+// MongoDB connection
 const connectToMongoDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
@@ -51,6 +52,7 @@ const connectToMongoDB = async () => {
 
 connectToMongoDB();
 
+// Routes
 app.get("/", (req, res) => {
   res.render("home.ejs");
 });
@@ -81,6 +83,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Login
 app.post(
   "/login",
   passport.authenticate("local", {
@@ -89,6 +92,7 @@ app.post(
   })
 );
 
+// Registration
 app.post("/register", async (req, res) => {
   const { username : email, password } = req.body;
 
@@ -116,6 +120,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Passport setup
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
@@ -148,7 +153,7 @@ passport.deserializeUser(async (id, done) => {
     done(err);
   }
 });
-
+// Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
